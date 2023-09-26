@@ -1,4 +1,6 @@
 # Chat using SignalR
+OLD Prohect [link](https://github.com/seby1621199/Chat-with-JSON/tree/master)
+
 [Link catre clientul web](http://chat.pavalsebastian.live/client/)
 
 This project aims to provide an in-depth understanding of WebSocket functionality. It consists of two versions: Desktop (WPF) and WebClient (React).
