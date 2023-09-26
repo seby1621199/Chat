@@ -6,7 +6,6 @@ import React, { Component } from 'react';
 import Button from '@mui/material/Button';
 import { TextField } from "@mui/material";
 import studentIcon from './icon/student.ico';
-export { Chat };
 
 class Chat extends Component {
     constructor(props) {
@@ -18,7 +17,7 @@ class Chat extends Component {
 
 
         this.socket = new HubConnectionBuilder()
-            .withUrl('https://localhost:7059/chathub', {
+            .withUrl('http://34.118.23.12:5000/chathub', {   ///http://34.118.23.12:5000/chathub // https://localhost:7059/chathub
                 skipNegotiation: true,
                 transport: signalR.HttpTransportType.WebSockets
             })
@@ -53,16 +52,35 @@ class Chat extends Component {
                         .then(() => {
                             console.log('Metoda SetUsername apelată cu succes');
                         })
+
                         .catch((error) => {
                             console.error('Eroare la apelarea metodei SetUsername:', error);
                         });
+                    
                     this.socket.on("ReceiveMessage", this.receiveMessage);
+                    this.socket.on("ReceiveLastMessages", this.processReceivedMessageList);
                 })
                 .catch((error) => {
                     console.error('Eroare la inițierea conexiunii:', error);
                 });
         }
     }
+
+
+    
+
+    processReceivedMessageList = (receivedMessageList) => {
+        const processedMessages = receivedMessageList.map((message) => {
+            return {
+                user: message.username,
+                text: message.text,
+                timestamp: message.time.substring(11, 16), 
+            };
+        });
+        this.setState((prevState) => ({
+            messages: [...prevState.messages, ...processedMessages],
+        }));
+    };
 
     receiveMessage = (user, message) => {
         const now = new Date();
@@ -142,4 +160,7 @@ class Chat extends Component {
     }
 }
 
+
+
+export { Chat };
 export default Chat;

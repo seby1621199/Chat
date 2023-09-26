@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.SignalR.Client;
+﻿using Client.Data;
+using Microsoft.AspNetCore.SignalR.Client;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -13,9 +14,7 @@ namespace Client
     public partial class ChatWindow : Window
     {
         private HubConnection _connection;
-        private PrivateMessage _privateMessage;
         private string _username;
-        private string _test;
 
         public ChatWindow()
         {
@@ -23,11 +22,6 @@ namespace Client
             connect();
 
         }
-        async Task testare()
-        {
-            _test = await _connection.InvokeAsync<string>("GetHelloMessage");
-        }
-
         void connect()
         {
             configureConnection();
@@ -57,6 +51,9 @@ namespace Client
                 return Task.CompletedTask;
             };
         }
+
+
+
         void configureReconnecting()
         {
             _connection.Reconnecting += (sender) =>
@@ -100,6 +97,17 @@ namespace Client
                     messages.Items.Add(newMessage);
                 });
             });
+            _connection.On<List<Message>>("ReceiveLastMessages", (List<Message> m) =>
+            {
+                this.Dispatcher.Invoke(() =>
+                {
+                    foreach (var message in m)
+                    {
+                        var newMessage = $"{message.Username}: {message.Text}";
+                        messages.Items.Add(newMessage);
+                    }
+                });
+            });
             _connection.On<List<string>>("ConnectedUsers", (List<string> users) =>
             {
                 this.Dispatcher.Invoke(() =>
@@ -126,6 +134,7 @@ namespace Client
                     Random r = new Random();
                     _username = "user" + r.Next(100, 1000);
                     messages.Items.Add("Username not set, your username: " + _username);
+                    usersList.Items.Add(_username);
                 }
                 await _connection.InvokeAsync("SetUsername", username.Text);
                 connectButton.IsEnabled = false;

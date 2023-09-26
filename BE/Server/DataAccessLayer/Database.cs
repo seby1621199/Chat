@@ -1,4 +1,5 @@
-﻿using MongoDB.Driver;
+﻿using MongoDB.Bson;
+using MongoDB.Driver;
 using Server.DataStructure;
 
 namespace Server.DataAccessLayer
@@ -10,7 +11,19 @@ namespace Server.DataAccessLayer
         private static IMongoCollection<Message> m_Collection = m_Database.GetCollection<Message>("messages");
         public static void AddMessage(string username, string text)
         {
-            m_Collection.InsertOne(new Message(username,text));
+            m_Collection.InsertOne(new Message(username, text));
+        }
+
+        internal static IEnumerable<object> GetLastMessages()
+        {
+            var messages = m_Collection.Find(new BsonDocument())
+                .SortByDescending(message => message.Time)
+                .Limit(5)
+                .ToList();
+
+            messages.Reverse();
+
+            return messages; 
         }
 
     }

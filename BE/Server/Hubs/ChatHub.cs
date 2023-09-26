@@ -15,6 +15,20 @@ namespace Server.Hubs
             _users.DictionaryModified += DictionaryModified;
         }
 
+
+        public override async Task OnConnectedAsync()
+        {
+            await base.OnConnectedAsync();
+            try
+            {
+                await Clients.Caller.SendAsync("ReceiveLastMessages", Database.GetLastMessages());
+            }
+                       catch (System.Exception ex)
+            {
+            }
+        }
+
+
         public override async Task OnDisconnectedAsync(Exception exception)
         {
 
